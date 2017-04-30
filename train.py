@@ -1,6 +1,8 @@
 import chainer
-from chainer import cuda, optimizers, datasets
+from chainer import cuda, optimizers, datasets, training
+from chainer.dataset import iterator
 from model import Generator, Discriminator
+from util import DCGANUpdater
 import argparse
 from PIL import Image
 import numpy as np
@@ -42,6 +44,8 @@ def main():
     op_d.add_hook(chainer.optimizer.WeightDecay(0.00001))
 
     train = datasets.ImageDataset(os.listdir(image_path))
+    train_iter = chainer.iterators.SerialIterator(train, args.batch)
+    updater = DCGANUpdater(train_iter, generator, discriminator,op_g,op_d,args.gpu)
 
 
 if __name__ == '__main__':
