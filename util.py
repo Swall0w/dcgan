@@ -1,6 +1,8 @@
 import numpy as np
 from chainer.dataset import iterator as itr_module
+from chainer.dataset import convert 
 from chainer import training
+import chainer
 
 def clip_img(x):
     return np.float32(-1 if x<-1 else (1 if x > 1 else x))
@@ -13,8 +15,27 @@ class DCGANUpdater(training.StandardUpdater):
         self.generator = generator
         self.discriminator = discriminator
         self._optimizers = {'generator':op_g,'discriminator':op_d}
+        self.converter = convert.concat_examples
         self.device = device
         self.iteration = 0
+        self.nz = nz
 
     def update_core(self):
         batch = self._iterators['main'].next()
+        images = self.converter(batch, self.device)
+        batchsize = images.shape[0]
+        x_real = Variable(images) / 255.
+        xp = chainer.cuda.get_array_module(x_real.data)
+
+# train generator
+        z = Variable(xp.asarray(np.random.uniform(-1,1,(batchsize,self.nz)).astype(np.float32)))
+        x_fake = self.generator(z, test=False)
+        y_fake = self.discriminator(x_fake,test=False)
+        loss_gen = F.softmax_cross_entropy(y_fake, Variable(xp.zeros(self.batchsize).astype(np.int32)))
+        loss_dis = F.softmax_cross_entropy(y_fake, Variable(xp.ones(self.batchsize).astype(np.int32)))
+
+# train discriminator
+        y_real = self.discriminator(x_real,test=False)
+
+
+

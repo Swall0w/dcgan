@@ -45,7 +45,8 @@ def main():
 
     train = datasets.ImageDataset(os.listdir(image_path))
     train_iter = chainer.iterators.SerialIterator(train, args.batch)
-    updater = DCGANUpdater(train_iter, generator, discriminator,op_g,op_d,args.gpu)
+    updater = DCGANUpdater(train_iter, generator, discriminator,op_g,op_d,args.gpu,nz)
+    trainer = training.Trainer(updater, (args.epoch,'epoch'),out=args.output)
 
 
 if __name__ == '__main__':
