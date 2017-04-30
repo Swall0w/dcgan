@@ -1,6 +1,7 @@
 import chainer
 from chainer import cuda, optimizers, datasets, training
 from chainer.dataset import iterator
+from chainer.training import extensions
 from model import Generator, Discriminator
 from util import DCGANUpdater
 import argparse
@@ -43,11 +44,15 @@ def main():
     op_d.setup(discriminator)
     op_d.add_hook(chainer.optimizer.WeightDecay(0.00001))
 
-    train = datasets.ImageDataset(os.listdir(image_path))
+    train = datasets.ImageDataset(paths=[f for f in os.listdir(image_path) if ('png'in f or 'jpg'in f)],root=image_path)
+
     train_iter = chainer.iterators.SerialIterator(train, args.batch)
     updater = DCGANUpdater(train_iter, generator, discriminator,op_g,op_d,args.gpu,nz)
     trainer = training.Trainer(updater, (args.epoch,'epoch'),out=args.output)
 
-
+    trainer.extend(extensions.LogReport())
+    trainer.extend(extensions.PrintReport(['epoch','loss/dis','loss/gen']))
+    trainer.extend(extensions.ProgressBar())
+    trainer.run()
 if __name__ == '__main__':
     main()
