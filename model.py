@@ -26,3 +26,24 @@ class Generator(chainer.Chain):
         h = F.relu(self.bn3(self.dc3(h), test=test))
         x = (self.dc4(h))
         return x
+
+class Discriminator(chainer.Chain):
+    def __init__(self):
+        super(Discriminator,self).__init__(
+        c0 = L.Convolution2D(3, 64, 4, stride=2, pad=1, wscale=0.02*math.sqrt(4*4*3)),
+        c1 = L.Convolution2D(64, 128, 4, stride=2, pad=1, wscale=0.02*math.sqrt(4*4*64)),
+        c2 = L.Convolution2D(128, 256, 4, stride=2, pad=1, wscale=0.02*math.sqrt(4*4*128)),
+        c3 = L.Convolution2D(256, 512, 4, stride=2, pad=1, wscale=0.02*math.sqrt(4*4*256)),
+        bn0 = L.BatchNormalization(64),
+        bn1 = L.BatchNormalization(128),
+        bn2 = L.BatchNormalization(256),
+        bn3 = L.BatchNormalization(512),
+        ll = L.Linear(6*6*512, 2, wscale=0.02*math.sqrt(6*6*512)),
+        )
+
+    def __call__(self, x, test=test):
+        h = elu(self.bn0(self.c0(h), test=test))
+        h = elu(self.bn1(self.c1(h), test=test))
+        h = elu(self.bn2(self.c2(h), test=test))
+        h = elu(self.bn3(self.c3(h), test=test))
+        l = self.ll(h)
