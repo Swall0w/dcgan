@@ -41,9 +41,9 @@ class Discriminator(chainer.Chain):
         ll = L.Linear(6*6*512, 2, wscale=0.02*math.sqrt(6*6*512)),
         )
 
-    def __call__(self, x, test=test):
-        h = elu(self.bn0(self.c0(h), test=test))
-        h = elu(self.bn1(self.c1(h), test=test))
-        h = elu(self.bn2(self.c2(h), test=test))
-        h = elu(self.bn3(self.c3(h), test=test))
+    def __call__(self, x, test=False):
+        h = F.elu(self.bn0(self.c0(h), test=test))
+        h = F.elu(self.bn1(self.c1(h), test=test))
+        h = F.elu(self.bn2(self.c2(h), test=test))
+        h = F.elu(self.bn3(self.c3(h), test=test))
         l = self.ll(h)
